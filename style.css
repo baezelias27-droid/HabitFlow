@@ -76,7 +76,7 @@
 
 /* ── RESET ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-font-smoothing: antialiased; }
+html { -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -84,6 +84,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  overflow-x: hidden;
 }
 a { text-decoration: none; color: inherit; }
 button { font-family: var(--font); cursor: pointer; border: none; background: none; }
@@ -374,9 +375,7 @@ ul { list-style: none; }
 /* ══════════════════════════════════════
    HABIT TABLE
 ══════════════════════════════════════ */
-.habit-table {
-  width: 100%;
-}
+.table-scroll { overflow-x: auto; }
 
 .habit-table {
   width: 100%;
@@ -813,12 +812,11 @@ input[type="color"] {
 
   .hamburger { display: flex; }
 
-  .main-content { margin-left: 0; }
+  .main-content { margin-left: 0; width: 100%; max-width: 100vw; }
 
   .content-section { padding: 20px 16px 48px; }
 
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-}
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .stat-value { font-size: 22px; }
 
   .card { padding: 18px; }
@@ -830,12 +828,18 @@ input[type="color"] {
   .goal-input-row { flex-direction: column; }
 
   .daily-grid { grid-template-columns: 1fr; }
+
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+
+  .habit-table { min-width: 480px; }
+
+  .profile-layout { grid-template-columns: 1fr; }
+
+  .app { max-width: 100vw; overflow-x: hidden; }
 }
 
 @media (max-width: 480px) {
-.stats-grid {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-}
+  .stats-grid { grid-template-columns: 1fr; }
   .auth-card { padding: 28px 20px; }
   .habit-cards-grid { grid-template-columns: 1fr; }
 }
