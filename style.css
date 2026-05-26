@@ -833,7 +833,9 @@ input[type="color"] {
 }
 
 @media (max-width: 480px) {
-  .stats-grid { grid-template-columns: 1fr; }
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
   .auth-card { padding: 28px 20px; }
   .habit-cards-grid { grid-template-columns: 1fr; }
 }
