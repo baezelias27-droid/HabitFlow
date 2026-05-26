@@ -374,7 +374,9 @@ ul { list-style: none; }
 /* ══════════════════════════════════════
    HABIT TABLE
 ══════════════════════════════════════ */
-.table-scroll { overflow-x: auto; }
+.habit-table {
+  width: 100%;
+}
 
 .habit-table {
   width: 100%;
