@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>habitFlow — Tu sistema de hábitos</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <!-- Main script -->
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+      AUTH OVERLAY — Login / Register
+  ══════════════════════════════════════ -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <span class="logo-icon">◆</span>
+        <span class="logo-text">habitFlow</span>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="login-panel" class="auth-panel active">
+        <h2 class="auth-title">Bienvenido de vuelta</h2>
+        <p class="auth-subtitle">Inicia sesión para continuar</p>
+
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" id="remember-me" checked />
+          <label for="remember-me">Mantener sesión iniciada</label>
+        </div>
+
+        <button class="btn-primary full-width" id="btn-login">Iniciar sesión</button>
+
+        <p class="auth-switch">
+          ¿No tienes cuenta? <span class="link" id="go-register">Regístrate</span>
+        </p>
+        <!-- Firebase auth se conecta aquí: firebase.auth().signInWithEmailAndPassword() -->
+      </div>
+
+      <!-- Register Panel -->
+      <div id="register-panel" class="auth-panel">
+        <h2 class="auth-title">Crear cuenta</h2>
+        <p class="auth-subtitle">Empieza tu viaje de hábitos</p>
+
+        <div class="form-group">
+          <label for="reg-name">Nombre</label>
+          <input type="text" id="reg-name" placeholder="Tu nombre" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Contraseña</label>
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+        </div>
+
+        <button class="btn-primary full-width" id="btn-register">Crear cuenta</button>
+
+        <p class="auth-switch">
+          ¿Ya tienes cuenta? <span class="link" id="go-login">Inicia sesión</span>
+        </p>
+        <!-- Firebase auth se conecta aquí: firebase.auth().createUserWithEmailAndPassword() -->
+      </div>
+
+    </div>
+  </div>
+  <!-- /auth-overlay -->
+
+
+  <!-- ══════════════════════════════════════
+       MAIN APP SHELL
+  ══════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">◆</span>
+          <span class="logo-text">habitFlow</span>
+        </div>
+        <button class="sidebar-close" id="sidebar-close" aria-label="Cerrar menú">✕</button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">▦</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-section="habits">
+          <span class="nav-icon">◎</span>
+          <span>Hábitos</span>
+        </a>
+        <a href="#" class="nav-item" data-section="goals">
+          <span class="nav-icon">◈</span>
+          <span>Objetivos</span>
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <span class="nav-icon">◬</span>
+          <span>Análisis</span>
+        </a>
+        <a href="#" class="nav-item" data-section="profile">
+          <span class="nav-icon">◉</span>
+          <span>Perfil</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+          <span id="theme-icon">◑</span>
+          <span id="theme-label">Modo oscuro</span>
+        </button>
+        <button class="btn-logout" id="btn-logout">
+          <span>⊗</span> Cerrar sesión
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+
+      <!-- Top Bar -->
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title" id="page-title">Dashboard</div>
+        <div class="topbar-actions">
+          <span class="user-greeting" id="user-greeting">Hola, usuario</span>
+        </div>
+      </header>
+
+      <!-- ── SECTION: DASHBOARD ── -->
+      <section id="section-dashboard" class="content-section active">
+
+        <div class="section-header">
+          <h1 class="section-title">Resumen semanal</h1>
+          <p class="section-subtitle" id="week-range">Esta semana</p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Progreso semanal</div>
+            <div class="stat-value" id="dash-weekly">0%</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="bar-weekly" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Progreso mensual</div>
+            <div class="stat-value" id="dash-monthly">0%</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="bar-monthly" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Progreso anual</div>
+            <div class="stat-value" id="dash-annual">0%</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="bar-annual" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Racha actual</div>
+            <div class="stat-value" id="dash-streak">0 días</div>
+            <div class="stat-sub">días consecutivos</div>
+          </div>
+        </div>
+
+        <!-- Habit table -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Tabla de hábitos</h2>
+            <button class="btn-primary small" id="btn-open-add-habit">+ Nuevo hábito</button>
+          </div>
+          <div class="table-scroll">
+            <table class="habit-table" id="habit-table">
+              <thead>
+                <tr id="table-header-row">
+                  <th class="col-habit">Hábito</th>
+                  <!-- Days injected by JS -->
+                </tr>
+              </thead>
+              <tbody id="habit-table-body">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="habits-empty">
+            <p>Aún no tienes hábitos. ¡Crea el primero!</p>
+          </div>
+        </div>
+
+      </section>
+      <!-- /section-dashboard -->
+
+
+      <!-- ── SECTION: HABITS (manage) ── -->
+      <section id="section-habits" class="content-section">
+
+        <div class="section-header">
+          <h1 class="section-title">Mis hábitos</h1>
+          <button class="btn-primary" id="btn-open-add-habit2">+ Nuevo hábito</button>
+        </div>
+
+        <!-- Day configuration -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Configurar días activos</h2>
+          </div>
+          <div class="day-toggle-row" id="day-toggle-row">
+            <!-- Day toggles injected by JS -->
+          </div>
+        </div>
+
+        <!-- Habit list cards -->
+        <div class="habit-cards-grid" id="habit-cards-grid">
+          <!-- Habit management cards injected by JS -->
+        </div>
+
+        <div class="empty-state" id="habit-manage-empty">
+          <p>No tienes hábitos todavía.</p>
+        </div>
+
+      </section>
+      <!-- /section-habits -->
+
+
+      <!-- ── SECTION: GOALS ── -->
+      <section id="section-goals" class="content-section">
+
+        <div class="section-header">
+          <h1 class="section-title">Objetivos de la semana</h1>
+          <p class="section-subtitle">No afectan tus porcentajes</p>
+        </div>
+
+        <div class="card">
+          <div class="goal-input-row">
+            <input type="text" id="goal-input" placeholder="Escribe un objetivo…" maxlength="100" />
+            <button class="btn-primary" id="btn-add-goal">Agregar</button>
+          </div>
+          <ul class="goal-list" id="goal-list">
+            <!-- Goals injected by JS -->
+          </ul>
+          <div class="empty-state" id="goals-empty">
+            <p>Agrega tus objetivos para esta semana.</p>
+          </div>
+        </div>
+
+      </section>
+      <!-- /section-goals -->
+
+
+      <!-- ── SECTION: ANALYTICS ── -->
+      <section id="section-analytics" class="content-section">
+
+        <div class="section-header">
+          <h1 class="section-title">Análisis semanal</h1>
+          <p class="section-subtitle">Mide tu bienestar día a día</p>
+        </div>
+
+        <!-- Variable selector -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Variables a medir</h2>
+          </div>
+          <div class="variable-toggle-row" id="variable-toggle-row">
+            <!-- Variable toggles injected by JS -->
+          </div>
+        </div>
+
+        <!-- Daily value inputs -->
+        <div class="card" id="daily-values-card">
+          <div class="card-header">
+            <h2 class="card-title">Valores diarios</h2>
+          </div>
+          <div class="daily-grid" id="daily-grid">
+            <!-- Inputs injected by JS -->
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2 class="card-title">Gráfico semanal</h2>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="wellness-chart"></canvas>
+          </div>
+        </div>
+
+      </section>
+      <!-- /section-analytics -->
+
+
+      <!-- ── SECTION: PROFILE ── -->
+      <section id="section-profile" class="content-section">
+
+        <div class="section-header">
+          <h1 class="section-title">Mi perfil</h1>
+        </div>
+
+        <div class="profile-layout">
+
+          <!-- Profile card -->
+          <div class="card profile-card">
+            <div class="avatar" id="profile-avatar">U</div>
+            <h2 class="profile-name" id="profile-name-display">Usuario</h2>
+            <p class="profile-email" id="profile-email-display">email@ejemplo.com</p>
+            <div class="profile-edit-row">
+              <input type="text" id="profile-name-input" placeholder="Tu nombre" maxlength="40" />
+              <button class="btn-primary small" id="btn-save-profile">Guardar</button>
+            </div>
+          </div>
+
+          <!-- Stats detail -->
+          <div class="profile-stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Hábitos activos</div>
+              <div class="stat-value" id="prof-habits-count">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Racha actual</div>
+              <div class="stat-value" id="prof-streak">0</div>
+              <div class="stat-sub">días</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Completados esta semana</div>
+              <div class="stat-value" id="prof-completed">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">% General</div>
+              <div class="stat-value" id="prof-general">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">% Semanal</div>
+              <div class="stat-value" id="prof-weekly">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">% Mensual</div>
+              <div class="stat-value" id="prof-monthly">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">% Anual</div>
+              <div class="stat-value" id="prof-annual">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Objetivos completados</div>
+              <div class="stat-value" id="prof-goals">0</div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+      <!-- /section-profile -->
+
+    </main>
+    <!-- /main-content -->
+
+  </div>
+  <!-- /app -->
+
+
+  <!-- ══════════════════════════════════════
+       MODAL — Add / Edit Habit
+  ══════════════════════════════════════ -->
+  <div id="modal-habit" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modal-habit-title">Nuevo hábito</h2>
+        <button class="modal-close" id="modal-habit-close">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label for="habit-name">Nombre del hábito</label>
+        <input type="text" id="habit-name" placeholder="Ej: Meditar, Leer, Ejercicio…" maxlength="50" />
+      </div>
+
+      <div class="form-group">
+        <label for="habit-emoji">Ícono (emoji)</label>
+        <input type="text" id="habit-emoji" placeholder="🏃" maxlength="4" />
+      </div>
+
+      <div class="form-group">
+        <label for="habit-color">Color</label>
+        <input type="color" id="habit-color" value="#6366f1" />
+      </div>
+
+      <div class="form-group">
+        <label>Días activos</label>
+        <div class="day-mini-row" id="habit-days-mini">
+          <!-- Day checkboxes injected by JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="btn-cancel-habit">Cancelar</button>
+        <button class="btn-primary" id="btn-save-habit">Guardar hábito</button>
+      </div>
+
+      <input type="hidden" id="habit-edit-id" />
+    </div>
+  </div>
+  <!-- /modal-habit -->
+
+
+  <!-- ══════════════════════════════════════
+       TOAST NOTIFICATIONS
+  ══════════════════════════════════════ -->
+  <div id="toast-container" class="toast-container"></div>
+
+</body>
+</html>
