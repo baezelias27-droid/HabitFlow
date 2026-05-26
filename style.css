@@ -817,7 +817,8 @@ input[type="color"] {
 
   .content-section { padding: 20px 16px 48px; }
 
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+}
   .stat-value { font-size: 22px; }
 
   .card { padding: 18px; }
